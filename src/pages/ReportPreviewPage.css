@@ -1,0 +1,90 @@
+/* Container chính của trang báo cáo */
+.report-preview-container {
+    padding: 24px;
+    background-color: #ffffff;
+}
+
+/* Thanh công cụ chứa các nút hành động */
+.report-toolbar {
+    margin-bottom: 16px;
+    padding: 16px 24px;
+    background: #fff;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+}
+
+/* Phần thông tin chung của báo cáo (Nhân viên, Ngày in) */
+.report-meta-info {
+    margin-top: 20px;
+    padding: 0 24px;
+    color: #595959;
+}
+
+/* Lớp bọc ngoài của bảng để có border */
+.report-table-container {
+    border: 1px solid #f0f0f0;
+    margin-top: 20px;
+}
+
+/* Bảng xem trước chung */
+.preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    table-layout: fixed; /* Giúp các cột có độ rộng ổn định */
+}
+
+/* Các ô trong bảng (cả th và td) */
+.preview-table th,
+.preview-table td {
+    border: 1px solid #f0f0f0;
+    padding: 10px 12px;
+    text-align: left;
+    word-break: break-word; /* Tự động xuống dòng nếu từ quá dài */
+}
+
+/* Header của bảng */
+.preview-table thead th {
+    background-color: #fafafa;
+    font-weight: 500;
+    color: #000000d9;
+}
+
+/* Hiệu ứng khi di chuột qua các hàng dữ liệu */
+.preview-table tbody tr:hover > td {
+    background: #e6f7ff;
+}
+
+/* Căn lề cho các ô đặc biệt */
+.preview-table .center {
+    text-align: center;
+}
+.preview-table .right {
+    text-align: right;
+}
+
+/* === CÁC STYLE QUAN TRỌNG CHO VIỆC GOM NHÓM === */
+
+/* Dòng header của mỗi nhóm thể loại */
+.genre-header-row > td {
+    background-color: #d9d9d9; /* Màu nền xám nhạt */
+    font-weight: bold;
+    font-size: 15px;
+    padding-left: 24px; /* Thụt vào một chút cho đẹp */
+    color: #262626;
+}
+
+/* Dòng tổng con của mỗi nhóm */
+.subtotal-row > td {
+    background-color: #fafafa;
+    font-weight: 500;
+    font-style: italic;
+    border-top: 1px solid #d9d9d9 !important; /* Thêm !important để ghi đè border mặc định */
+}
+
+/* Các dòng tổng cuối cùng trong tfoot */
+.preview-table tfoot .grand-total-row > td {
+    background-color: #f0f2f5;
+    font-weight: bold;
+    border-top: 2px solid #a0a0a0; /* Đường kẻ đậm hơn để phân tách */
+}

@@ -1,0 +1,38 @@
+.logo {
+    height: 32px;
+    margin: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    color: white;
+}
+
+.logo-text {
+    margin-left: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.site-layout .site-layout-background {
+    background: #fff;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+/* Style cho NavLink khi active */
+.ant-menu-item a.active {
+    background-color: #1890ff; /* Hoặc màu bạn muốn */
+    color: #fff !important; /* Ghi đè màu chữ */
+}
+
+/* Ghi đè style của antd để khi item được chọn, link bên trong nó có màu trắng */
+.ant-menu-dark.ant-menu-inline .ant-menu-item-selected a {
+    color: white;
+}
