@@ -9,9 +9,12 @@ import {
     DatabaseOutlined,
     ArrowRightOutlined,
     ArrowLeftOutlined,
+    UserSwitchOutlined,
     SolutionOutlined,
-    TagsOutlined
+    TagsOutlined,
+    IdcardOutlined
 } from '@ant-design/icons';
+
 import { useAuth } from '../../contexts/AuthContext';
 import './MainLayout.css'; // Sẽ tạo file CSS này
 
@@ -23,18 +26,48 @@ const MainLayout = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
+    // const handleLogout = () => {
+    //     logout();
+    //     navigate('/login');
+    // };
 
     // Nội dung của Popover khi click vào Avatar
+    // const userPopoverContent = (
+    //     <div>
+    //         <Button
+    //             type="text"
+    //             icon={<LogoutOutlined />}
+    //             onClick={handleLogout}
+    //             style={{ width: '100%', textAlign: 'left' }}
+    //         >
+    //             Đăng xuất
+    //         </Button>
+    //     </div>
+    // );
+
+
+    const [isChangePasswordModalVisible, setIsChangePasswordModalVisible] = useState(false);
+    const handleCloseChangePasswordModal = (shouldLogout) => {
+        setIsChangePasswordModalVisible(false);
+        if (shouldLogout) {
+            logout(); // Gọi hàm logout từ AuthContext
+        }
+    };
+
     const userPopoverContent = (
         <div>
             <Button
                 type="text"
+                icon={<IdcardOutlined />}
+                onClick={() => setIsChangePasswordModalVisible(true)}
+                style={{ width: '100%', textAlign: 'left' }}
+            >
+                Đổi mật khẩu
+            </Button>
+            <Button
+                type="text"
                 icon={<LogoutOutlined />}
-                onClick={handleLogout}
+                onClick={logout}
                 style={{ width: '100%', textAlign: 'left' }}
             >
                 Đăng xuất
@@ -72,6 +105,11 @@ const MainLayout = () => {
                         <NavLink to="/book-types">Quản lý Thể loại</NavLink>
                     </Menu.Item>
 
+
+                    <Menu.Item key="/accounts" icon={<UserSwitchOutlined />}>
+                        <NavLink to="/accounts">Quản lý Tài khoản</NavLink>
+                    </Menu.Item>
+
                     <Menu.Item key="6" icon={<DatabaseOutlined />}>
                         <NavLink to="/backup">Sao lưu & Phục hồi</NavLink>
                     </Menu.Item>
@@ -94,7 +132,7 @@ const MainLayout = () => {
                         >
                             <Button type="text" style={{ height: 'auto' }}>
                                 <Avatar icon={<UserOutlined />} style={{ marginRight: 8 }} />
-                                <Text>{user?.username || 'User'}</Text>
+                                <Text>{user?.hoTenDayDu  || 'User'}</Text>
                             </Button>
                         </Popover>
                     </div>
@@ -104,10 +142,17 @@ const MainLayout = () => {
                     <Outlet />
                 </Content>
             </Layout>
+            {isChangePasswordModalVisible && (
+                <ChangePasswordModal
+                    visible={isChangePasswordModalVisible}
+                    onCancel={handleCloseChangePasswordModal}
+                />
+            )}
         </Layout>
     );
 };
 
 // Cần import 2 icon này
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
+import ChangePasswordModal from "../../pages/ChangePasswordModal.jsx";
 export default MainLayout;

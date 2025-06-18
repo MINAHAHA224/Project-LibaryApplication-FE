@@ -6,7 +6,7 @@ import {
 import {UserOutlined, BookOutlined, SearchOutlined, WarningOutlined, FileExcelOutlined} from '@ant-design/icons';
 import dayjs from 'dayjs';
 import {
-    getNewTicketId, getStaffList, getActiveReader, getAvailableBook,
+    getNewTicketId, getStaffList, getAllActiveReaders, getAllAvailableBooks,
     getRentalHistory, createRental, getRentalDetail
 } from '../services/rentalService';
 import ReturnBookModal from '../components/rental/ReturnBookModal'; // Component mới
@@ -20,13 +20,15 @@ const RentalPage = () => {
     const [form] = Form.useForm();
     const [staffList, setStaffList] = useState([]);
     const [rentalHistory, setRentalHistory] = useState([]);
-    const [loading, setLoading] = useState({ form: false, history: true });
     const navigate = useNavigate();
     const [isReportModalVisible, setIsReportModalVisible] = useState(false);
     const [reportDates, setReportDates] = useState([]);
     const [readerInfo, setReaderInfo] = useState(null);
     const [rentingBooks, setRentingBooks] = useState([]);
 
+    const [activeReaders, setActiveReaders] = useState([]); // <<-- State mới
+    const [availableBooks, setAvailableBooks] = useState([]); // <<-- State mới
+    const [loading, setLoading] = useState({ form: true, history: true, books: true , readers: true }); // Thêm books loading
 
     const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
     const [isReturnModalVisible, setIsReturnModalVisible] = useState(false);
@@ -53,10 +55,12 @@ const RentalPage = () => {
     const loadInitialData = async () => {
         setLoading({ form: true, history: true });
         try {
-            const [ticketRes, staffRes, historyRes] = await Promise.all([
+            const [ticketRes, staffRes, historyRes,availableBooksRes ,activeReadersRes] = await Promise.all([
                 getNewTicketId(),
                 getStaffList(),
-                getRentalHistory()
+                getRentalHistory(),
+                getAllAvailableBooks(),
+                getAllActiveReaders()
             ]);
             form.setFieldsValue({
                 maphieu: ticketRes.data.newTicketId,
@@ -64,53 +68,41 @@ const RentalPage = () => {
             });
             setStaffList(staffRes.data);
             setRentalHistory(historyRes.data);
+            setAvailableBooks(availableBooksRes.data); // <<-- Lưu danh sách sách
+            setActiveReaders(activeReadersRes.data);
         } catch (error) {
             message.error("Lỗi khi tải dữ liệu ban đầu.");
         } finally {
-            setLoading({ form: false, history: false });
+            setLoading({ form: false, history: false ,books: false  ,readers: false});
         }
     };
 
     // --- HANDLERS ---
-    const handleSearchReader = async () => {
-        const readerId = form.getFieldValue('madg');
+// === HÀM CHỌN ĐỘC GIẢ MỚI ===
+    const handleSelectReader = async (readerId) => {
         if (!readerId) {
-            message.warning('Vui lòng nhập mã độc giả.');
+            setReaderInfo(null);
             return;
         }
-        setLoading(p => ({ ...p, form: true }));
-        try {
-            const res = await getActiveReader(readerId);
-            if (res.data && res.data.hoten) {
-                if (res.data.hoatdong === 0) {
-                    message.error('Thẻ độc giả này đã bị khóa!');
-                    setReaderInfo(null);
-                } else if (new Date(res.data.ngayhethan) < new Date()) {
-                    message.error('Thẻ độc giả đã hết hạn!');
-                    setReaderInfo(null);
-                }
-                else {
-                    setReaderInfo(res.data);
-                }
-            } else {
-                message.error('Không tìm thấy độc giả hoặc thẻ đã bị khóa.');
-                setReaderInfo(null);
-            }
-        } catch (error) {
-            message.error('Lỗi khi tìm độc giả.');
-            setReaderInfo(null);
-        } finally {
-            setLoading(p => ({ ...p, form: false }));
+        // Thông tin chi tiết hơn có thể không cần gọi lại API
+        // vì chúng ta có thể đã có đủ từ danh sách, nhưng để chắc chắn, ta vẫn có thể gọi API chi tiết
+        // Hoặc đơn giản là hiển thị thông tin đã có
+        const selectedReader = activeReaders.find(r => r.madg === readerId);
+        if (selectedReader) {
+            // Hiển thị thông tin cơ bản
+            setReaderInfo({
+                madg: selectedReader.madg,
+                hoten: `${selectedReader.hodg} ${selectedReader.tendg}`,
+                // Thêm các thông tin khác nếu cần, ví dụ ngày hết hạn
+            });
         }
     };
+    // === HÀM THÊM SÁCH MỚI (DÙNG CHO SELECT) ===
+    const handleSelectBook = (bookId) => {
+        if (!bookId) return;
 
-    const handleAddBook = async () => {
-        const bookId = form.getFieldValue('masach');
-        if (!bookId) {
-            message.warning('Vui lòng nhập mã sách.');
-            return;
-        }
-        if(rentingBooks.length >= 3){
+        // Các kiểm tra logic vẫn giữ nguyên
+        if (rentingBooks.length >= 3) {
             message.warning('Chỉ được mượn tối đa 3 cuốn sách.');
             return;
         }
@@ -119,25 +111,12 @@ const RentalPage = () => {
             return;
         }
 
-        setLoading(p => ({...p, form: true}));
-        try {
-            const res = await getAvailableBook(bookId);
-            if(res.data && res.data.masach) {
-                if(res.data.tinhtrang === 0) {
-                    message.error(`Sách "${res.data.tensach}" đã được thanh lý, không thể mượn.`);
-                } else if(res.data.chomuon === 1) {
-                    message.error(`Sách "${res.data.tensach}" hiện đang được mượn.`);
-                } else {
-                    setRentingBooks(prev => [...prev, res.data]);
-                    form.setFieldsValue({ masach: '' });
-                }
-            } else {
-                message.error('Không tìm thấy sách hoặc sách không có sẵn.');
-            }
-        } catch (error) {
-            message.error('Lỗi khi tìm sách.');
-        } finally {
-            setLoading(p => ({...p, form: false}));
+        // Tìm thông tin sách trong danh sách đã tải về
+        const selectedBook = availableBooks.find(b => b.masach === bookId);
+        if (selectedBook) {
+            setRentingBooks(prev => [...prev, selectedBook]);
+            // Xóa giá trị đã chọn khỏi ô Select để người dùng có thể chọn tiếp
+            form.setFieldsValue({ masach: null });
         }
     };
 
@@ -243,17 +222,46 @@ const RentalPage = () => {
                         <Form.Item label="Mã Phiếu" name="maphieu">
                             <Input readOnly />
                         </Form.Item>
-                        <Form.Item label="Mã Độc Giả" name="madg" rules={[{ required: true }]}>
-                            <Input addonAfter={<Button icon={<SearchOutlined />} onClick={handleSearchReader} />} placeholder="Nhập mã và nhấn tìm" />
+                        {/* === THAY THẾ Ô INPUT ĐỘC GIẢ === */}
+                        <Form.Item label="Tìm & Chọn Độc Giả" name="madg" rules={[{ required: true }]}>
+                            <Select
+                                showSearch
+                                placeholder="Gõ mã, tên, hoặc CMND độc giả..."
+                                onSelect={handleSelectReader}
+                                loading={loading.readers}
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={activeReaders.map(reader => ({
+                                    value: reader.madg,
+                                    label: `${reader.hodg} ${reader.tendg} - (Mã: ${reader.madg} - CMND: ${reader.socmnd})`
+                                }))}
+                                allowClear
+                                onChange={(value) => { if (!value) setReaderInfo(null); }} // Xóa thông tin khi clear
+                            />
                         </Form.Item>
+
                         {readerInfo && (
-                            <Card size="small" style={{ marginBottom: 16 }}>
-                                <Text strong>{readerInfo.hoten}</Text><br/>
-                                <Text type="secondary">Thẻ hết hạn: {formatDate(readerInfo.ngayhethan)}</Text>
+                            <Card size="small" style={{ marginBottom: 16, borderLeft: '3px solid #1890ff' }}>
+                                <Text strong>Đang chọn:</Text> {readerInfo.hoten} (Mã: {readerInfo.madg})
                             </Card>
                         )}
-                        <Form.Item label="Mã Sách" name="masach">
-                            <Input addonAfter={<Button icon={<SearchOutlined />} onClick={handleAddBook} />} placeholder="Nhập mã sách và nhấn tìm" />
+                        <Form.Item label="Tìm & Thêm Sách" name="masach">
+                            <Select
+                                showSearch
+                                placeholder="Gõ mã hoặc tên sách để tìm..."
+                                onSelect={handleSelectBook} // Gọi hàm khi người dùng chọn một sách
+                                loading={loading.books}
+                                filterOption={(input, option) =>
+                                    // Logic lọc: tìm trong cả value (mã sách) và children (tên sách)
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                // Chuyển đổi danh sách sách thành định dạng options của AntD
+                                options={availableBooks.map(book => ({
+                                    value: book.masach,
+                                    label: `${book.masach} - ${book.tensach}`
+                                }))}
+                            />
                         </Form.Item>
                         <Table
                             columns={bookColumns}

@@ -14,6 +14,10 @@ export const getRentalDetail = (ticketId) => apiClient.get(`/rentals/${ticketId}
 export const createRental = (data) => apiClient.post('/rentals', data);
 // --- NGHIỆP VỤ TRẢ SÁCH ---
 export const returnBook = (data) => apiClient.post('/rentals/return-book', data);
+
+export const getAllAvailableBooks = () => apiClient.get('/rentals/available-books');
+export const getAllActiveReaders = () => apiClient.get('/rentals/active-readers');
+
 export const downloadOverdueReport = () => {
     return apiFileClient.get('/readers/reports/overdue-borrowings');
 };
@@ -25,3 +29,5 @@ export const getMostBorrowedReportData = (tuNgay, denNgay) => {
     return apiClient.get(`/rentals/reports/most-borrowed-preview-data?tuNgay=${tuNgay}&denNgay=${denNgay}`);
 };
 export const getOverdueReportData = () => apiClient.get('/readers/reports/overdue-preview-data');
+
+
