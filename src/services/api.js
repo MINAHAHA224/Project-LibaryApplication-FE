@@ -141,6 +141,23 @@
 import axios from 'axios';
 // BỎ import { App } from 'antd';
 // BỎ let messageApi; và export const setMessageApi;
+// Interceptor này sẽ được tái sử dụng
+const authInterceptor = (config) => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+};
+// Thêm một instance Axios mới chuyên dụng cho việc tải file
+export const apiFileClient = axios.create({
+    baseURL: 'http://localhost:8080/api',
+    responseType: 'blob', // QUAN TRỌNG: yêu cầu response dưới dạng file
+});
+// Áp dụng CÙNG MỘT Interceptor cho apiFileClient
+apiFileClient.interceptors.request.use(authInterceptor, (error) => Promise.reject(error));
+
+
 
 const apiClient = axios.create({
     baseURL: 'http://localhost:8080/api',
@@ -149,11 +166,6 @@ const apiClient = axios.create({
     },
 });
 
-// Thêm một instance Axios mới chuyên dụng cho việc tải file
-export const apiFileClient = axios.create({
-    baseURL: 'http://localhost:8080/api',
-    responseType: 'blob', // QUAN TRỌNG: yêu cầu response dưới dạng file
-});
 
 // Interceptor cho Request (giữ nguyên)
 apiClient.interceptors.request.use(

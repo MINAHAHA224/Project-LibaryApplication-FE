@@ -62,7 +62,7 @@ const OverdueReportPreview = () => {
                     <div className="report-header">
                         <Title level={2} style={{ textAlign: 'center' }}>DANH SÁCH ĐỘC GIẢ MƯỢN SÁCH QUÁ HẠN</Title>
                         <div className="report-meta-info">
-                            <Text strong>Nhân viên lập báo cáo:</Text> {user?.username} <br />
+                            <Text strong>Nhân viên lập báo cáo:</Text> {user?.hoTenDayDu} <br />
                             <Text strong>Ngày in:</Text> {new Date().toLocaleString('vi-VN')}
                         </div>
                     </div>

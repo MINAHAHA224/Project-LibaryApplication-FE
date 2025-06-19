@@ -16,6 +16,8 @@ import ReaderReportPreview from '../pages/ReaderReportPreview'; // Import trang 
 import OverdueReportPreview from '../pages/OverdueReportPreview';
 import MostBorrowedReportPreview from '../pages/MostBorrowedReportPreview';
 import AccountManagementPage from "../pages/AccountManagementPage.jsx";
+import ResetPasswordPage from '../pages/ResetPasswordPage';
+
 function AppRoutes() { // Đổi tên thành AppRoutes
     return (
         <Routes>
@@ -34,6 +36,8 @@ function AppRoutes() { // Đổi tên thành AppRoutes
                     <Route path="/rentals/reports/most-borrowed/preview" element={<MostBorrowedReportPreview />} />
                     {/* === THÊM ROUTE MỚI CHO QUẢN LÝ TÀI KHOẢN === */}
                     <Route path="/accounts" element={<AccountManagementPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
+
                     <Route path="/backup" element={<BackupPage />} />
                 </Route>
             </Route>

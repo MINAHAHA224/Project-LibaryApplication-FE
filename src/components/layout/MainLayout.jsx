@@ -12,7 +12,8 @@ import {
     UserSwitchOutlined,
     SolutionOutlined,
     TagsOutlined,
-    IdcardOutlined
+    IdcardOutlined,
+    KeyOutlined
 } from '@ant-design/icons';
 
 import { useAuth } from '../../contexts/AuthContext';
@@ -104,11 +105,15 @@ const MainLayout = () => {
                     <Menu.Item key="7" icon={<TagsOutlined />}> {/* Thay đổi key và icon */}
                         <NavLink to="/book-types">Quản lý Thể loại</NavLink>
                     </Menu.Item>
+                    <Menu.Item key="/reset-password" icon={<KeyOutlined />}>
+                        <NavLink to="/reset-password">Đổi MK Người dùng</NavLink>
+                    </Menu.Item>
 
 
                     <Menu.Item key="/accounts" icon={<UserSwitchOutlined />}>
                         <NavLink to="/accounts">Quản lý Tài khoản</NavLink>
                     </Menu.Item>
+
 
                     <Menu.Item key="6" icon={<DatabaseOutlined />}>
                         <NavLink to="/backup">Sao lưu & Phục hồi</NavLink>

@@ -795,6 +795,7 @@ import {
 import { formatDate } from '../utils/helpers';
 import BookTitleModal from '../components/bookTitle/BookTitleModal';
 import BookSubTable from '../components/bookTitle/BookSubTable'; // Import sub-table
+// import AuthenticatedImage from '../components/common/AuthenticatedImage'; // Import component mới
 
 // ... imports
 import { downloadFile } from '../utils/helpers';

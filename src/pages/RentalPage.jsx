@@ -16,7 +16,10 @@ const { RangePicker } = DatePicker;
 const { Title, Text } = Typography;
 import { useNavigate } from 'react-router-dom';
 import Search from "antd/es/input/Search.js";
+import { useAuth } from '../contexts/AuthContext'; // Import useAuth để lấy thông tin user
+
 const RentalPage = () => {
+    const { user } = useAuth(); // Lấy thông tin user từ context
     const [form] = Form.useForm();
     const [staffList, setStaffList] = useState([]);
     const [rentalHistory, setRentalHistory] = useState([]);
@@ -38,7 +41,10 @@ const RentalPage = () => {
     useEffect(() => {
         // Tải dữ liệu ban đầu cho form và lịch sử
         loadInitialData();
-    }, []);
+        if (user) {
+            form.setFieldsValue({ manv: user.maNV });
+        }
+    }, [user, form]);
 
 
     const handleViewDetails = (ticketId) => {
@@ -69,6 +75,7 @@ const RentalPage = () => {
             setStaffList(staffRes.data);
             setRentalHistory(historyRes.data);
             setAvailableBooks(availableBooksRes.data); // <<-- Lưu danh sách sách
+           console.log("availableBooksRes",activeReadersRes.data);
             setActiveReaders(activeReadersRes.data);
         } catch (error) {
             message.error("Lỗi khi tải dữ liệu ban đầu.");
@@ -88,6 +95,8 @@ const RentalPage = () => {
         // vì chúng ta có thể đã có đủ từ danh sách, nhưng để chắc chắn, ta vẫn có thể gọi API chi tiết
         // Hoặc đơn giản là hiển thị thông tin đã có
         const selectedReader = activeReaders.find(r => r.madg === readerId);
+
+
         if (selectedReader) {
             // Hiển thị thông tin cơ bản
             setReaderInfo({
@@ -159,7 +168,7 @@ const RentalPage = () => {
             madg: values.madg,
             ngaymuon: values.ngaymuon.format('YYYY-MM-DD'),
             hinhthuc: values.hinhthuc,
-            manv: values.manv,
+            manv: user.manv,  // <<-- Lấy thẳng maNV từ context, không lấy từ form nữa
             danhSachSach: rentingBooks.map(b => b.masach)
         };
 
@@ -281,10 +290,12 @@ const RentalPage = () => {
                         <Form.Item label="Ngày Mượn" name="ngaymuon" rules={[{ required: true }]}>
                             <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} />
                         </Form.Item>
-                        <Form.Item label="Nhân Viên" name="manv" rules={[{ required: true }]}>
-                            <Select placeholder="Chọn nhân viên">
-                                {staffList.map(nv => <Select.Option key={nv.manv} value={nv.manv}>{nv.tennv}</Select.Option>)}
-                            </Select>
+                        {/* === THAY ĐỔI Ô NHÂN VIÊN === */}
+                        <Form.Item label="Nhân Viên Lập Phiếu">
+                            {/* Trường ẩn để giữ giá trị maNV cho form, không bắt buộc nhưng có thể hữu ích */}
+
+                            {/* Ô Input chỉ đọc để hiển thị tên */}
+                            <Input value={user?.hoTenDayDu} readOnly />
                         </Form.Item>
                         <Space>
                             <Button type="primary" htmlType="submit" loading={loading.form}>Lập Phiếu</Button>
