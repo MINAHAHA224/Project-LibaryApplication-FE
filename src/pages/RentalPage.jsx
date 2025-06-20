@@ -385,7 +385,7 @@ const RentalPage = () => {
                 </Space>
                 <Table
                     columns={historyColumns}
-                    dataSource={rentalHistory}
+                    dataSource={filteredHistory}
                     rowKey="maphieu"
                     loading={loading.history}
                     bordered
