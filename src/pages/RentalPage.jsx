@@ -38,6 +38,7 @@ const RentalPage = () => {
     const [selectedTicketId, setSelectedTicketId] = useState(null);
     const { message } = App.useApp();
     const DURATION = 3;
+    const [filteredHistory, setFilteredHistory] = useState([]); // <<-- State mới cho bảng lịch sử
 
     // --- EFFECTS ---
     useEffect(() => {
@@ -77,7 +78,8 @@ const RentalPage = () => {
             setStaffList(staffRes.data);
             setRentalHistory(historyRes.data);
             setAvailableBooks(availableBooksRes.data); // <<-- Lưu danh sách sách
-           console.log("availableBooksRes",activeReadersRes.data);
+            setFilteredHistory(historyRes.data); // <<-- Cập nhật state mới
+
             setActiveReaders(activeReadersRes.data);
         } catch (error) {
             message.error("Lỗi khi tải dữ liệu ban đầu.");
@@ -85,6 +87,20 @@ const RentalPage = () => {
         } finally {
             setLoading({ form: false, history: false ,books: false  ,readers: false});
         }
+    };
+
+    const handleSearchHistory = (value) => {
+        const lowercasedValue = value.toLowerCase().trim();
+        if (!lowercasedValue) {
+            setFilteredHistory(rentalHistory);
+            return;
+        }
+        const filtered = rentalHistory.filter(item =>
+            item.maphieu.toString().includes(lowercasedValue) ||
+            item.tendocgia.toLowerCase().includes(lowercasedValue) ||
+            item.tennv.toLowerCase().includes(lowercasedValue)
+        );
+        setFilteredHistory(filtered);
     };
 
     // --- HANDLERS ---
@@ -110,26 +126,72 @@ const RentalPage = () => {
         }
     };
     // === HÀM THÊM SÁCH MỚI (DÙNG CHO SELECT) ===
-    const handleSelectBook = (bookId) => {
-        if (!bookId) return;
+    // const handleSelectBook = (bookId) => {
+    //     if (!bookId) return;
+    //
+    //     // Các kiểm tra logic vẫn giữ nguyên
+    //     if (rentingBooks.length >= 3) {
+    //         message.warning('Chỉ được mượn tối đa 3 cuốn sách.');
+    //
+    //         return;
+    //     }
+    //     if (rentingBooks.some(b => b.masach === bookId)) {
+    //         message.warning('Sách này đã có trong danh sách mượn.');
+    //         return;
+    //     }
+    //
+    //     // Tìm thông tin sách trong danh sách đã tải về
+    //     const selectedBook = availableBooks.find(b => b.masach === bookId);
+    //     if (selectedBook) {
+    //         setRentingBooks(prev => [...prev, selectedBook]);
+    //         // Xóa giá trị đã chọn khỏi ô Select để người dùng có thể chọn tiếp
+    //         form.setFieldsValue({ masach: null });
+    //     }
+    //
+    // };
 
-        // Các kiểm tra logic vẫn giữ nguyên
+    const handleSelectBook = (bookId) => {
+        if (!bookId) {
+            return;
+        }
+
         if (rentingBooks.length >= 3) {
             message.warning('Chỉ được mượn tối đa 3 cuốn sách.');
-            return;
-        }
-        if (rentingBooks.some(b => b.masach === bookId)) {
-            message.warning('Sách này đã có trong danh sách mượn.');
+            form.setFieldsValue({ masach: null }); // Reset ô select
             return;
         }
 
-        // Tìm thông tin sách trong danh sách đã tải về
-        const selectedBook = availableBooks.find(b => b.masach === bookId);
-        if (selectedBook) {
-            setRentingBooks(prev => [...prev, selectedBook]);
-            // Xóa giá trị đã chọn khỏi ô Select để người dùng có thể chọn tiếp
+        if (rentingBooks.some(b => b.masach === bookId)) {
+            message.warning('Sách này đã có trong danh sách mượn.');
             form.setFieldsValue({ masach: null });
+            return;
         }
+
+        // Tìm thông tin đầy đủ của sách đã chọn từ state availableBooks
+        const selectedBookInfo = availableBooks.find(b => b.masach === bookId);
+        if (!selectedBookInfo) {
+            message.error('Không tìm thấy thông tin sách đã chọn.');
+            form.setFieldsValue({ masach: null });
+            return;
+        }
+
+        // === LOGIC KIỂM TRA ĐẦU SÁCH MỚI ===
+        // Lấy ra danh sách ISBN của các cuốn sách đã có trong giỏ mượn
+        const existingIsbnsInCart = rentingBooks.map(book => book.isbn);
+
+        // Kiểm tra xem ISBN của sách mới chọn đã tồn tại trong giỏ chưa
+        if (existingIsbnsInCart.includes(selectedBookInfo.isbn)) {
+            message.error('Không được mượn 2 cuốn sách có cùng một đầu sách trong một phiếu mượn.');
+            form.setFieldsValue({ masach: null });
+            return;
+        }
+        // === KẾT THÚC LOGIC MỚI ===
+
+        // Nếu tất cả kiểm tra đều qua, thêm sách vào danh sách
+        setRentingBooks(prev => [...prev, selectedBookInfo]);
+
+        // Xóa giá trị trong ô Select để người dùng có thể tìm và chọn sách khác
+        form.setFieldsValue({ masach: null });
     };
 
     const handleRemoveBook = (bookId) => {
@@ -171,7 +233,7 @@ const RentalPage = () => {
             madg: values.madg,
             ngaymuon: values.ngaymuon.format('YYYY-MM-DD'),
             hinhthuc: values.hinhthuc,
-            manv: user.manv,  // <<-- Lấy thẳng maNV từ context, không lấy từ form nữa
+            manv: user.maNV.toString(),  // <<-- Lấy thẳng maNV từ context, không lấy từ form nữa
             danhSachSach: rentingBooks.map(b => b.masach)
         };
 
@@ -315,7 +377,11 @@ const RentalPage = () => {
                     <Button icon={<WarningOutlined />} onClick={() => navigate('/rentals/reports/overdue/preview')} danger>BC Sách Quá Hạn</Button>
                     {/* NÚT MỚI */}
                     <Button icon={<FileExcelOutlined />} onClick={showMostBorrowedReportModal}>BC Sách Mượn Nhiều</Button>
-                    <Search/>
+                    <Search
+                        placeholder="Tìm mã phiếu, độc giả, NV..."
+                        onSearch={handleSearchHistory}
+                        allowClear
+                    />
                 </Space>
                 <Table
                     columns={historyColumns}
