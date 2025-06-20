@@ -13,7 +13,7 @@ import {
     SolutionOutlined,
     TagsOutlined,
     IdcardOutlined,
-    KeyOutlined
+    KeyOutlined, ReadOutlined
 } from '@ant-design/icons';
 
 import { useAuth } from '../../contexts/AuthContext';
@@ -96,13 +96,16 @@ const MainLayout = () => {
                     <Menu.Item key="2" icon={<TeamOutlined />}>
                         <NavLink to="/readers">Quản lý Độc giả</NavLink>
                     </Menu.Item>
-                    <Menu.Item key="7" icon={<TagsOutlined />}> {/* Thay đổi key và icon */}
+                    <Menu.Item key="3" icon={<ReadOutlined  />} >
+                        <NavLink to="/authors">Quản lý Tác giả</NavLink>
+                    </Menu.Item>
+                    <Menu.Item key="8" icon={<TagsOutlined />}> {/* Thay đổi key và icon */}
                         <NavLink to="/book-types">Quản lý Thể loại</NavLink>
                     </Menu.Item>
-                    <Menu.Item key="3" icon={<SolutionOutlined />}>
+                    <Menu.Item key="4" icon={<SolutionOutlined />}>
                         <NavLink to="/staffs">Quản lý Nhân viên</NavLink>
                     </Menu.Item>
-                    <Menu.Item key="4" icon={<ArrowRightOutlined />}>
+                    <Menu.Item key="5" icon={<ArrowRightOutlined />}>
                         <NavLink to="/rentals">Mượn Sách & Trả Sách</NavLink>
                     </Menu.Item>
 
@@ -116,7 +119,7 @@ const MainLayout = () => {
                     </Menu.Item>
 
 
-                    <Menu.Item key="6" icon={<DatabaseOutlined />}>
+                    <Menu.Item key="7" icon={<DatabaseOutlined />}>
                         <NavLink to="/backup">Sao lưu & Phục hồi</NavLink>
                     </Menu.Item>
                     {/* Thêm các Menu.Item khác ở đây */}

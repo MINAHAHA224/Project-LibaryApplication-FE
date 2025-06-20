@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Modal, Form, Input, Select, Checkbox, message } from 'antd';
+import {Modal, Form, Input, Select, Checkbox, message, App} from 'antd';
 
 const { Option } = Select;
 
@@ -7,6 +7,9 @@ const BookModal = ({ visible, onCancel, onSave, initialData, drawers }) => {
     const [form] = Form.useForm();
     const isEditing = !!initialData;
     const isRented = isEditing && initialData?.choMuon; // Kiểm tra sách có đang được mượn không
+    const { message } = App.useApp();
+    const DURATION = 3;
+
 
     useEffect(() => {
         if (visible) {
@@ -31,7 +34,7 @@ const BookModal = ({ visible, onCancel, onSave, initialData, drawers }) => {
             })
             .catch(info => {
                 console.log('Validate Failed:', info);
-                message.error('Vui lòng điền đầy đủ thông tin bắt buộc.');
+                message.error('Vui lòng điền đầy đủ thông tin bắt buộc.' , DURATION);
             });
     };
 

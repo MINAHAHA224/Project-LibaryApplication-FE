@@ -1,0 +1,12 @@
+.guest-page-container {
+    background-color: #f0f2f5;
+    min-height: 100vh;
+}
+.guest-header {
+    background-color: #001529;
+    padding: 20px 50px;
+    box-shadow: 0 2px 8px #f0f1f2;
+}
+.guest-content {
+    padding: 24px 50px;
+}

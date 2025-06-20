@@ -388,18 +388,28 @@ const BookTitleModal = ({ visible, onCancel, onSave, initialData }) => {
                     <Typography.Title level={5}>Thông tin chi tiết</Typography.Title>
                     <Row gutter={16}>
                         <Col span={12}>
-                            <Form.Item name="codeBookTitle" label="ISBN" rules={[{ required: true }]}>
+                            <Form.Item name="codeBookTitle" label="ISBN" rules={[{ required: true ,whitespace: true ,message : 'Mã đầu sách không được để trống' },
+
+                                {
+                                    max: 15,
+                                    message: 'Mã đầu sách không được vượt quá 15 ký tự',
+                                },
+                            ]}>
                                 {/*<Input disabled={isEditing} />*/}
                                 <Input />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="nameBook" label="Tên Sách" rules={[{ required: true }]}>
+                            <Form.Item name="nameBook" label="Tên Sách" rules={[{ required: true,whitespace: true ,message : 'Tên Sách không được để trống' }
+                                ,{
+                                    max: 100,
+                                    message: 'Mã đầu sách không được vượt quá 100 ký tự',
+                                },]}>
                                 <Input />
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Form.Item name="codeAuthor" label="Tác giả" rules={[{ required: true }]}>
+                    <Form.Item name="codeAuthor" label="Tác giả" rules={[{ required: true,message : 'Vui lòng chọn tác giả' }]}>
                         <Select mode="multiple" allowClear placeholder="Chọn tác giả">
                             {formDropdownData.authors.map(author => (
                                 <Option key={author.id} value={author.id}>{author.name}</Option>
@@ -411,24 +421,33 @@ const BookTitleModal = ({ visible, onCancel, onSave, initialData }) => {
                     </Form.Item>
                     <Row gutter={16}>
                         <Col span={8}>
-                            <Form.Item name="formatBook" label="Khổ Sách" rules={[{ required: true }]}>
+                            <Form.Item name="formatBook" label="Khổ Sách" rules={[{ required: true ,whitespace: true ,message : 'Khổ Sách không được để trống'  }
+
+                                ,{
+                                    max: 5,
+                                    message: 'Khổ Sách không được vượt quá 5 ký tự',
+                                },]}>
                                 <Input />
                             </Form.Item>
                         </Col>
                         <Col span={8}>
-                            <Form.Item name="pages" label="Số trang" rules={[{ required: true, type: 'number', min: 1 }]}>
+                            <Form.Item name="pages" label="Số trang" rules={[{ required: true, type: 'number', min: 1,message : 'Số trang không được để trống' }]}>
                                 <InputNumber style={{ width: '100%' }} />
                             </Form.Item>
                         </Col>
                         <Col span={8}>
-                            <Form.Item name="editions" label="Lần xuất bản" rules={[{ required: true, type: 'number', min: 1 }]}>
+                            <Form.Item name="editions" label="Lần xuất bản" rules={[{ required: true, type: 'number', min: 1,message : 'Lần xuất bản không được để trống' }]}>
                                 <InputNumber style={{ width: '100%' }} />
                             </Form.Item>
                         </Col>
                     </Row>
                     <Row gutter={16}>
                         <Col span={8}>
-                            <Form.Item name="namePublisher" label="Nhà xuất bản" rules={[{ required: true }]}>
+                            <Form.Item name="namePublisher" label="Nhà xuất bản" rules={[{ required: true,whitespace: true ,message : 'Nhà xuất bản không được để trống' }
+                                ,{
+                                    max: 100,
+                                    message: 'Nhà xuất bản không được vượt quá 100 ký tự',
+                                },]}>
                                 <Input />
                             </Form.Item>
                         </Col>
@@ -451,14 +470,14 @@ const BookTitleModal = ({ visible, onCancel, onSave, initialData }) => {
                             </Form.Item>
                         </Col>
                         <Col span={8}>
-                            <Form.Item name="price" label="Giá (VNĐ)" rules={[{ required: true, type: 'number', min: 0 }]}>
+                            <Form.Item name="price" label="Giá (VNĐ)" rules={[{ required: true, type: 'number', min: 0 ,message : 'Giá không được để trống' }]}>
                                 <InputNumber style={{ width: '100%' }} formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} parser={value => value.replace(/\$\s?|(,*)/g, '')} />
                             </Form.Item>
                         </Col>
                     </Row>
                     <Row gutter={16}>
                         <Col span={8}>
-                            <Form.Item name="codeLanguage" label="Ngôn ngữ" rules={[{ required: true }]}>
+                            <Form.Item name="codeLanguage" label="Ngôn ngữ" rules={[{ required: true ,message : 'Vui lòng chọn Ngôn ngữ'}]}>
                                 <Select placeholder="Chọn ngôn ngữ">
                                     {formDropdownData.languages.map(lang => (
                                         <Option key={lang.id} value={lang.id}>{lang.name}</Option>
@@ -467,7 +486,7 @@ const BookTitleModal = ({ visible, onCancel, onSave, initialData }) => {
                             </Form.Item>
                         </Col>
                         <Col span={8}>
-                            <Form.Item name="codeType" label="Thể loại" rules={[{ required: true }]}>
+                            <Form.Item name="codeType" label="Thể loại" rules={[{ required: true ,message : 'Vui lòng chọn Thể loại' }]}>
                                 <Select placeholder="Chọn thể loại">
                                     {formDropdownData.bookTypes.map(type => (
                                         <Option key={type.id} value={type.id}>{type.name}</Option>
