@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Form, Input, Button, Card, Spin, message } from 'antd';
+import { Form, Input, Button, Card, Spin, message ,Typography } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import './LoginPage.css'; // Sẽ tạo file CSS này
+const { Title, Text } = Typography;
 
 const LoginPage = () => {
     const [loading, setLoading] = useState(false);

@@ -27,8 +27,8 @@ const BookTypePage = () => {
             setFilteredData(res.data);
         } catch (error) {
             // Bây giờ ta phải tự xử lý lỗi ở đây
-            const errorMessage = error.response?.data?.message || "Không thể tải danh sách thể loại.";
-            message.error(errorMessage, DURATION);
+            message.error( error.response.data.message || error.response.data.error ||"fetchData Không thể tải danh sách thể loại.", DURATION);
+
         }
         finally { setLoading(false); }
     }, []);
@@ -47,6 +47,7 @@ const BookTypePage = () => {
         );
         setFilteredData(filtered);
     };
+
 
     const handleSave = async (values) => {
         try {
@@ -73,8 +74,8 @@ const BookTypePage = () => {
             setIsModalVisible(false);
             fetchData(); // Tải lại dữ liệu
         } catch (error) {
-            const errorMessage = error.response?.data?.message || "Không thể tải danh sách thể loại.";
-            message.error(errorMessage, DURATION);
+
+            message.error( error.response.data.message || error.response.data.error ||"handleSave error:", DURATION);
         }
     };
 
@@ -85,8 +86,8 @@ const BookTypePage = () => {
             pushToHistory({ actionType: 'DELETE', data: { originalData: recordToDelete } });
             fetchData();
         } catch (error) {
-            const errorMessage = error.response?.data?.message || "Không thể tải danh sách thể loại.";
-            message.error(errorMessage, DURATION);
+            message.error( error.response.data.message || error.response.data.error ||"handleDelete error:", DURATION);
+
 
         }
     };
@@ -105,8 +106,8 @@ const BookTypePage = () => {
             fetchData();
         } catch (error) {
             historyStack.push(lastAction);
-            const errorMessage = error.response?.data?.message || "Không thể tải danh sách thể loại.";
-            message.error(errorMessage, DURATION);
+            message.error( error.response.data.message || error.response.data.error ||"handleUndo error:", DURATION);
+
         } finally {
             setLoading(false);
         }
@@ -123,9 +124,10 @@ const BookTypePage = () => {
                         <Button icon={<EditOutlined />} onClick={() => { setEditingData(record); setIsModalVisible(true); }} />
                     </Tooltip>
                     <Tooltip title="Xóa">
-                        <Popconfirm title={`Bạn chắc chắn muốn xóa thể loại "${record.name}"?`} onConfirm={() => handleDelete(record)}>
-                            <Button danger icon={<DeleteOutlined />} />
-                        </Popconfirm>
+                        {/*<Popconfirm title={`Bạn chắc chắn muốn xóa thể loại "${record.name}"?`} onConfirm={() => handleDelete(record)}>*/}
+                        {/*    <Button danger icon={<DeleteOutlined />}  />*/}
+                        {/*</Popconfirm>*/}
+                        <Button danger icon={<DeleteOutlined />} onClick={ () => handleDelete(record) } />
                     </Tooltip>
                 </Space>
             ),

@@ -306,7 +306,7 @@ const ReportPreviewPage = () => {
                     </Space>
                 </Space>
                 <div style={{ marginTop: 20 }}>
-                    <Text strong>Nhân viên lập báo cáo:</Text> {user?.username} <br/>
+                    <Text strong>Nhân viên lập báo cáo:</Text> {user?.hoTenDayDu} <br/>
                     <Text strong>Ngày in:</Text> {new Date().toLocaleString('vi-VN')}
                 </div>
             </div>

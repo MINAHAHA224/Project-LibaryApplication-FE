@@ -96,15 +96,16 @@ const MainLayout = () => {
                     <Menu.Item key="2" icon={<TeamOutlined />}>
                         <NavLink to="/readers">Quản lý Độc giả</NavLink>
                     </Menu.Item>
+                    <Menu.Item key="7" icon={<TagsOutlined />}> {/* Thay đổi key và icon */}
+                        <NavLink to="/book-types">Quản lý Thể loại</NavLink>
+                    </Menu.Item>
                     <Menu.Item key="3" icon={<SolutionOutlined />}>
                         <NavLink to="/staffs">Quản lý Nhân viên</NavLink>
                     </Menu.Item>
                     <Menu.Item key="4" icon={<ArrowRightOutlined />}>
                         <NavLink to="/rentals">Mượn Sách & Trả Sách</NavLink>
                     </Menu.Item>
-                    <Menu.Item key="7" icon={<TagsOutlined />}> {/* Thay đổi key và icon */}
-                        <NavLink to="/book-types">Quản lý Thể loại</NavLink>
-                    </Menu.Item>
+
                     <Menu.Item key="/reset-password" icon={<KeyOutlined />}>
                         <NavLink to="/reset-password">Đổi MK Người dùng</NavLink>
                     </Menu.Item>

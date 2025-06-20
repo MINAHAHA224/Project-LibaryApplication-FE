@@ -288,7 +288,7 @@ const RentalPage = () => {
                             </Select>
                         </Form.Item>
                         <Form.Item label="Ngày Mượn" name="ngaymuon" rules={[{ required: true }]}>
-                            <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} />
+                            <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }}   disabled   />
                         </Form.Item>
                         {/* === THAY ĐỔI Ô NHÂN VIÊN === */}
                         <Form.Item label="Nhân Viên Lập Phiếu">

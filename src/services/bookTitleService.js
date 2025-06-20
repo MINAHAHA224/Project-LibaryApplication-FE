@@ -25,14 +25,11 @@ const createBookTitle = (formData) => {
     });
 };
 
-const updateBookTitle = (isbn, formData) => {
+const updateBookTitle = (isbn, formData) => { // formData giờ là một FormData object
     return apiClient.put(`/book-titles/${isbn}`, formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
     });
 };
-
 const deleteBookTitle = (isbn) => {
     return apiClient.delete(`/book-titles/${isbn}`);
 };
@@ -49,6 +46,13 @@ const undoBookTitleAction = (action) => {
     return apiFileClient.get('/book-titles/report/excel');
 };
 
+ const uploadBookImage = (isbn, imageFile) => {
+    const formData = new FormData();
+    formData.append('imageFile', imageFile);
+    return apiClient.post(`/book-titles/${isbn}/upload-image`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+};
 
 export {
     getBookTitles,
@@ -60,4 +64,5 @@ export {
     undoBookTitleAction,
     getBookTitleReportData, // <<-- Thêm vào đây
     downloadBookTitleReport,  // <<-- Thêm vào đây
+    uploadBookImage
 };

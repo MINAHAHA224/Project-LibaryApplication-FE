@@ -18,8 +18,9 @@ const ReaderPage = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingReader, setEditingReader] = useState(null);
     const [historyStack, setHistoryStack] = useState([]);
-    const { message: messageApi } = App.useApp();
-    const DURATION = 3;
+    const { message } = App.useApp(); // Khởi tạo message instance
+    const DURATION = 3; // Định nghĩa DURATION
+
     const navigate = useNavigate();
 
     const [filteredReaders, setFilteredReaders] = useState([]); // State chứa dữ liệu đã lọc để hiển thị
@@ -32,7 +33,7 @@ const ReaderPage = () => {
             setFilteredReaders(res.data); // Ban đầu, dữ liệu hiển thị bằng dữ liệu gốc
 
         } catch (error) {
-            // lỗi đã được xử lý ở component cha hoặc interceptor
+            message.error( error.response.data.message || error.response.data.error ||"fetchReaders error:", DURATION);
         } finally {
             setLoading(false);
         }
@@ -86,17 +87,18 @@ const ReaderPage = () => {
         try {
             if (editingReader) {
                 const response = await updateReader(editingReader.madg, formattedValues);
-                messageApi.success('Cập nhật độc giả thành công!', DURATION);
+                message.success('Cập nhật độc giả thành công!', DURATION);
                 pushToHistory({ actionType: 'UPDATE', data: { oldData: editingReader, newData: response.data } });
             } else {
                 const response = await createReader(formattedValues);
-                messageApi.success('Thêm độc giả thành công!', DURATION);
+                message.success('Thêm độc giả thành công!', DURATION);
                 pushToHistory({ actionType: 'ADD', data: { madg: response.data.madg } });
             }
             setIsModalVisible(false);
             fetchReaders();
         } catch (error) {
-            // Lỗi đã được xử lý bởi interceptor hoặc ở component cha, không cần message.error ở đây.
+
+            message.error( error.response.data.message||error.response.data.error ||"Can save", DURATION);
         } finally {
             setLoading(false);
         }
@@ -108,18 +110,18 @@ const ReaderPage = () => {
             // Tìm lại record đầy đủ trong state để lưu vào history
             const recordToDelete = readers.find(r => r.madg === readerId);
             if (!recordToDelete) {
-                messageApi.error("Không tìm thấy độc giả để xóa.", DURATION);
+                message.error("Không tìm thấy độc giả để xóa.", DURATION);
                 return;
             }
 
             await deleteReader(readerId); // Gọi API với ID đúng
-            messageApi.success('Xóa độc giả thành công!', DURATION);
+            message.success('Xóa độc giả thành công!', DURATION);
 
             pushToHistory({ actionType: 'DELETE', data: { originalData: recordToDelete } });
 
             fetchReaders();
         } catch (error) {
-            console.error("Failed to delete reader:", error);
+            message.error( error.response.data.message || error.response.data.error ||"Failed to delete reader:", DURATION);
         } finally {
             setLoading(false);
         }
@@ -127,18 +129,18 @@ const ReaderPage = () => {
 
     const handleUndo = async () => {
         if (historyStack.length === 0) {
-            messageApi.info('Không có hành động nào để hoàn tác.', DURATION);
+            message.info('Không có hành động nào để hoàn tác.', DURATION);
             return;
         }
         const lastAction = historyStack.pop();
         setLoading(true);
         try {
             await undoReaderAction(lastAction);
-            messageApi.success('Hoàn tác thành công!', DURATION);
+            message.success('Hoàn tác thành công!', DURATION);
             setHistoryStack([...historyStack]); // Cập nhật state để re-render
             fetchReaders();
         } catch (error) {
-            // Lỗi đã được xử lý bởi interceptor hoặc ở component cha
+            message.error( error.response.data.message || error.response.data.error ||"handleUndo error:", DURATION);
         } finally {
             setLoading(false);
         }
@@ -156,14 +158,15 @@ const ReaderPage = () => {
             render: (_, record) => (
                 <Space size="middle">
                     <Button icon={<EditOutlined />} onClick={() => handleEdit(record)}>Sửa</Button>
-                    <Popconfirm
-                        title={`Bạn chắc chắn muốn xóa độc giả "${record.hodg} ${record.tendg}"?`}
-                        onConfirm={() => handleDelete(record.madg)} // SỬA Ở ĐÂY: DÙNG record.madg
-                        okText="Đồng ý"
-                        cancelText="Hủy"
-                    >
-                        <Button danger icon={<DeleteOutlined />}>Xóa</Button>
-                    </Popconfirm>
+                    {/*<Popconfirm*/}
+                    {/*    title={`Bạn chắc chắn muốn xóa độc giả "${record.hodg} ${record.tendg}"?`}*/}
+                    {/*    onConfirm={() => handleDelete(record.madg)} // SỬA Ở ĐÂY: DÙNG record.madg*/}
+                    {/*    okText="Đồng ý"*/}
+                    {/*    cancelText="Hủy"*/}
+                    {/*>*/}
+                    {/*    <Button danger icon={<DeleteOutlined />}>Xóa</Button>*/}
+                    {/*</Popconfirm>*/}
+                        <Button danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.madg)}>Xóa</Button>
                 </Space>
             ),
         },

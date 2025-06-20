@@ -10,7 +10,7 @@
 //     const [isModalVisible, setIsModalVisible] = useState(false);
 //     const [editingStaff, setEditingStaff] = useState(null);
 //     const [historyStack, setHistoryStack] = useState([]);
-//     const { message: messageApi } = App.useApp();
+//     const { message: message } = App.useApp();
 //     const DURATION = 3;
 //
 //     const fetchStaffs = useCallback(async () => {
@@ -49,11 +49,11 @@
 //         try {
 //             if (editingStaff) {
 //                 const response = await updateStaff(editingStaff.maNV, values);
-//                 messageApi.success('Cập nhật nhân viên thành công!', DURATION);
+//                 message.success('Cập nhật nhân viên thành công!', DURATION);
 //                 pushToHistory({ actionType: 'UPDATE', data: { oldData: editingStaff, newData: response.data } });
 //             } else {
 //                 const response = await createStaff(values);
-//                 messageApi.success('Thêm nhân viên thành công!', DURATION);
+//                 message.success('Thêm nhân viên thành công!', DURATION);
 //                 pushToHistory({ actionType: 'ADD', data: { maNV: response.data.maNV } });
 //             }
 //             setIsModalVisible(false);
@@ -70,7 +70,7 @@
 //         setLoading(true);
 //         try {
 //             await deleteStaff(recordToDelete.maNV);
-//             messageApi.success('Xóa nhân viên thành công!', DURATION);
+//             message.success('Xóa nhân viên thành công!', DURATION);
 //             pushToHistory({ actionType: 'DELETE', data: { originalData: recordToDelete } });
 //             fetchStaffs();
 //         } catch (error) {
@@ -83,7 +83,7 @@
 //
 //     const handleUndo = async () => {
 //         if (historyStack.length === 0) {
-//             messageApi.info('Không có hành động nào để hoàn tác.', DURATION);
+//             message.info('Không có hành động nào để hoàn tác.', DURATION);
 //             return;
 //         }
 //
@@ -94,7 +94,7 @@
 //         setLoading(true);
 //         try {
 //             await undoStaffAction(lastAction);
-//             messageApi.success('Hoàn tác thành công!', DURATION);
+//             message.success('Hoàn tác thành công!', DURATION);
 //             setHistoryStack(newHistoryStack); // Cập nhật state của stack
 //             fetchStaffs(); // Tải lại dữ liệu từ server
 //         } catch (error) {
@@ -221,8 +221,8 @@ const StaffPage = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingStaff, setEditingStaff] = useState(null);
     const [historyStack, setHistoryStack] = useState([]);
-    const { message: messageApi } = App.useApp();
-    const DURATION = 3;
+    const { message } = App.useApp(); // Khởi tạo message instance
+    const DURATION = 3; // Định nghĩa DURATION
 
     const fetchStaffs = useCallback(async () => {
         setLoading(true);
@@ -231,7 +231,7 @@ const StaffPage = () => {
             setStaffs(res.data);
             setFilteredStaffs(res.data);
         } catch (error) {
-            // Lỗi đã được interceptor xử lý và hiển thị thông báo
+            message.error( error.response.data.message || error.response.data.error ||"fetchStaffs error:", DURATION);
             console.error("Failed to fetch staff list:", error);
         } finally {
             setLoading(false);
@@ -275,17 +275,17 @@ const StaffPage = () => {
         try {
             if (editingStaff) {
                 const response = await updateStaff(editingStaff.maNV, values);
-                messageApi.success('Cập nhật nhân viên thành công!', DURATION);
+                message.success('Cập nhật nhân viên thành công!', DURATION);
                 pushToHistory({ actionType: 'UPDATE', data: { oldData: editingStaff, newData: response.data } });
             } else {
                 const response = await createStaff(values);
-                messageApi.success('Thêm nhân viên thành công!', DURATION);
+                message.success('Thêm nhân viên thành công!', DURATION);
                 pushToHistory({ actionType: 'ADD', data: { maNV: response.data.maNV } });
             }
             setIsModalVisible(false);
             fetchStaffs();
         } catch (error) {
-            // Lỗi đã được interceptor xử lý
+            message.error( error.response.data.message || error.response.data.error ||"handleSave error:", DURATION);
             console.error("Failed to save staff:", error);
         } finally {
             setLoading(false);
@@ -296,11 +296,11 @@ const StaffPage = () => {
         setLoading(true);
         try {
             await deleteStaff(recordToDelete.maNV);
-            messageApi.success('Xóa nhân viên thành công!', DURATION);
+            message.success('Xóa nhân viên thành công!', DURATION);
             pushToHistory({ actionType: 'DELETE', data: { originalData: recordToDelete } });
             fetchStaffs();
         } catch (error) {
-            // Lỗi đã được interceptor xử lý
+            message.error( error.response.data.message || error.response.data.error ||"handleDelete error:", DURATION);
             console.error("Failed to delete staff:", error);
         } finally {
             setLoading(false);
@@ -309,7 +309,7 @@ const StaffPage = () => {
 
     const handleUndo = async () => {
         if (historyStack.length === 0) {
-            messageApi.info('Không có hành động nào để hoàn tác.', DURATION);
+            message.info('Không có hành động nào để hoàn tác.', DURATION);
             return;
         }
 
@@ -320,11 +320,11 @@ const StaffPage = () => {
         setLoading(true);
         try {
             await undoStaffAction(lastAction);
-            messageApi.success('Hoàn tác thành công!', DURATION);
+            message.success('Hoàn tác thành công!', DURATION);
             setHistoryStack(newHistoryStack); // Cập nhật state của stack
             fetchStaffs(); // Tải lại dữ liệu từ server
         } catch (error) {
-            // Lỗi đã được interceptor xử lý
+            message.error( error.response.data.message || error.response.data.error ||"handleUndo error:", DURATION);
             console.error("Failed to undo action:", error);
         } finally {
             setLoading(false);
@@ -375,14 +375,16 @@ const StaffPage = () => {
                         <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
                     </Tooltip>
                     <Tooltip title="Xóa">
-                        <Popconfirm
-                            title={`Bạn chắc chắn muốn xóa nhân viên "${record.hoNV} ${record.tenNV}"?`}
-                            onConfirm={() => handleDelete(record)}
-                            okText="Đồng ý"
-                            cancelText="Hủy"
-                        >
-                            <Button danger icon={<DeleteOutlined />} />
-                        </Popconfirm>
+                        {/*<Popconfirm*/}
+                        {/*    title={`Bạn chắc chắn muốn xóa nhân viên "${record.hoNV} ${record.tenNV}"?`}*/}
+                        {/*    onConfirm={() => handleDelete(record)}*/}
+                        {/*    okText="Đồng ý"*/}
+                        {/*    cancelText="Hủy"*/}
+                        {/*>*/}
+                        {/*    <Button danger icon={<DeleteOutlined />} />*/}
+                        {/*</Popconfirm>*/}
+
+                            <Button danger icon={<DeleteOutlined />} onClick={() => handleDelete(record)} />
                     </Tooltip>
                 </Space>
             ),

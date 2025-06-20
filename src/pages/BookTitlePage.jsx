@@ -793,6 +793,8 @@ import {
     getBookTitleReportData
 } from '../services/bookTitleService';
 import { formatDate } from '../utils/helpers';
+import dayjs from 'dayjs'; // Đảm bảo đã import dayjs
+
 import BookTitleModal from '../components/bookTitle/BookTitleModal';
 import BookSubTable from '../components/bookTitle/BookSubTable'; // Import sub-table
 // import AuthenticatedImage from '../components/common/AuthenticatedImage'; // Import component mới
@@ -825,11 +827,13 @@ const BookTitlePage = () => {
         setLoading(true);
         try {
             const response = await getBookTitles();
+            console.log("fetchBookTitles response:",response);
             const dataWithStatus = response.data.map(item => ({ ...item, status: 'UNCHANGED' }));
             setBookTitles(dataWithStatus);
             setFilteredBookTitles(dataWithStatus);
         } catch (error) {
-            // Interceptor đã hiển thị lỗi
+            message.error( error.response.data.message || error.response.data.error ||"fetchBookTitles error:", DURATION);
+            console.log("fetchBookTitles error:",error);
         } finally {
             setLoading(false);
         }
@@ -888,55 +892,68 @@ const BookTitlePage = () => {
 
             fetchBookTitles(); // Tải lại bảng
         } catch (error) {
-            const errorMessage = error.response?.data?.error || 'Đã có lỗi không xác định xảy ra.';
-            message.error(errorMessage, DURATION);
+            message.error( error.response.data.message || error.response.data.error ||"handleDelete error:", DURATION);
+
+           console.log("handleDelete error:",error);
         } finally {
             setLoading(false);
         }
     };
 
-    // Hàm này được gọi khi form trong Modal được submit
     const handleModalSave = async (formData, imageFile) => {
         setLoading(true);
+// === SỬA LẠI LOGIC FORMAT NGÀY THÁNG Ở ĐÂY ===
+        let formattedDate = null;
+        // Kiểm tra xem formData.dateRelease có tồn tại không
+        if (formData.dateRelease) {
+            // Kiểm tra xem nó có phải là đối tượng dayjs không (có hàm .format)
+            if (typeof formData.dateRelease.format === 'function') {
+                formattedDate = formData.dateRelease.format('YYYY-MM-DD');
+            } else {
+                // Nếu không, nó là timestamp hoặc chuỗi, tạo đối tượng dayjs từ nó
+                formattedDate = dayjs(formData.dateRelease).format('YYYY-MM-DD');
+            }
+        }
+        // Format lại ngày tháng
+        const dataToSend = {
+            ...formData,
+            dateRelease: formData.dateRelease ? formData.dateRelease.format('YYYY-MM-DD') : null,
+        };
 
+        // Tạo FormData
         const postData = new FormData();
-        postData.append('bookTitleData', new Blob([JSON.stringify(formData)], { type: 'application/json' }));
+        postData.append('bookTitleData', new Blob([JSON.stringify(dataToSend)], { type: 'application/json' }));
+
+        // Nếu có file mới được chọn (dù là thêm hay sửa), đính kèm nó
         if (imageFile) {
             postData.append('imageFile', imageFile);
         }
 
         try {
-            if (editingBook) { // --- Sửa ---
+            if (editingBook) {
                 const response = await updateBookTitle(editingBook.codeBookTitle, postData);
-                message.success("Cập nhật thành công!" , DURATION);
-
-                // Đẩy hành động UPDATE vào stack
+                message.success("Cập nhật thành công!", DURATION);
+                // Logic push history cho UPDATE phải lưu cả ISBN cũ và mới
                 pushToHistory({
                     actionType: 'UPDATE',
                     data: {
-                        oldData: editingBook, // Dữ liệu trước khi sửa
-                        newData: response.data // Dữ liệu sau khi sửa từ API trả về
+                        oldData: editingBook, // Chứa ISBN cũ
+                        newData: response.data // Chứa ISBN mới
                     }
                 });
-
-            } else { // --- Thêm mới ---
+            } else {
                 const response = await createBookTitle(postData);
-                message.success("Thêm mới thành công!" , DURATION);
-
-                // Đẩy hành động ADD vào stack
-                pushToHistory({
-                    actionType: 'ADD',
-                    data: { codeBookTitle: response.data.codeBookTitle } // Chỉ cần lưu lại ID để có thể xóa
-                });
+                message.success("Thêm mới thành công!", DURATION);
+                pushToHistory({ actionType: 'ADD', data: { codeBookTitle: response.data.codeBookTitle } });
             }
             setIsModalVisible(false);
             fetchBookTitles();
         } catch (error) {
-            const errorMessage = error.response?.data?.error || 'Đã có lỗi không xác định xảy ra.';
-            message.error(errorMessage, DURATION);
-        } finally {
-            setLoading(false);
+            /*...*/
+            message.error( error.response.data.message || error.response.data.error ||"handleModalSave error:", DURATION);
+            console.log("handleModalSave error:",error);
         }
+        finally { setLoading(false); }
     };
 
     // --- HANDLER CHO NÚT UNDO ---
@@ -958,8 +975,8 @@ const BookTitlePage = () => {
 
             fetchBookTitles(); // Tải lại dữ liệu
         } catch (error) {
-            const errorMessage = error.response?.data?.error || 'Đã có lỗi không xác định xảy ra.';
-            message.error(errorMessage, DURATION);
+            message.error( error.response.data.message || error.response.data.error ||"handleUndo error:", DURATION);
+           console.log("handleUndo error:",error);
         } finally {
             setLoading(false);
         }
@@ -1097,7 +1114,12 @@ const BookTitlePage = () => {
             {isModalVisible && (
                 <BookTitleModal
                     visible={isModalVisible}
-                    onCancel={() => setIsModalVisible(false)}
+                    onCancel={(shouldRefresh) => {
+                        setIsModalVisible(false);
+                        if (shouldRefresh) {
+                            fetchBookTitles();
+                        }
+                    }}
                     onSave={handleModalSave} // Sẽ truyền cả file và data
                     initialData={editingBook}
                 />

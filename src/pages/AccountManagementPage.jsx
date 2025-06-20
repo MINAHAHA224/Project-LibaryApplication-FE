@@ -11,7 +11,7 @@
 //     const [isModalVisible, setIsModalVisible] = useState(false);
 //     const [selectedUser, setSelectedUser] = useState(null); // { id, name, type: 'NHANVIEN' | 'DOCGIA' }
 //     const [form] = Form.useForm();
-//     const { message: messageApi } = AntdApp.useApp();
+//     const { message: message } = AntdApp.useApp();
 //
 //     const fetchData = useCallback(async () => {
 //         setLoading(true);
@@ -47,7 +47,7 @@
 //                 userId: selectedUser.id.toString(),
 //             };
 //             await createAccount(payload);
-//             messageApi.success(`Tạo tài khoản ${values.loginName} thành công!`);
+//             message.success(`Tạo tài khoản ${values.loginName} thành công!`);
 //             setIsModalVisible(false);
 //             form.resetFields();
 //             fetchData(); // Tải lại danh sách
@@ -125,7 +125,7 @@
 
 // src/pages/AccountManagementPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, List, Button, Spin, Modal, Form, Input, App as AntdApp } from 'antd';
+import {Row, Col, List, Button, Spin, Modal, Form, Input, App as AntdApp, App} from 'antd';
 import { UserAddOutlined } from '@ant-design/icons';
 import { getStaffsWithoutLogin, getReadersWithoutLogin, createAccount } from '../services/accountService';
 
@@ -136,7 +136,9 @@ const AccountManagementPage = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [form] = Form.useForm();
-    const { message: messageApi } = AntdApp.useApp();
+
+    const { message } = App.useApp(); // Khởi tạo message instance
+    const DURATION = 3; // Định nghĩa DURATION
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -170,7 +172,7 @@ const AccountManagementPage = () => {
                 userId: selectedUser.id.toString(),
             };
             await createAccount(payload);
-            messageApi.success(`Tạo tài khoản ${values.loginName} thành công!`);
+            message.success(`Tạo tài khoản ${values.loginName} thành công!` , DURATION);
             setIsModalVisible(false);
             form.resetFields();
             fetchData();
