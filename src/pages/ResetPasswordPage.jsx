@@ -12,7 +12,9 @@ const ResetPasswordPage = () => {
     const [loading, setLoading] = useState(true);
     const [form] = Form.useForm();
     const navigate = useNavigate();
-    const { message: messageApi } = AntdApp.useApp();
+    const { message } = AntdApp.useApp();
+
+    const DURATION = 3;
 
     useEffect(() => {
         const fetchAccounts = async () => {
@@ -20,7 +22,12 @@ const ResetPasswordPage = () => {
             try {
                 const res = await getCreatedLogins();
                 setAccounts(res.data);
-            } catch (error) { /* handled by interceptor */ }
+            } catch (error) {
+                console.log("fetchAccounts" ,error);
+                message.error( error.response.data.message || error.response.data.error ||"fetchAccounts error:", DURATION);
+
+
+            }
             finally { setLoading(false); }
         };
         fetchAccounts();
@@ -30,9 +37,14 @@ const ResetPasswordPage = () => {
         setLoading(true);
         try {
             await resetPasswordForUser(values);
-            messageApi.success(`Đổi mật khẩu cho tài khoản ${values.loginName} thành công!`);
+            message.success(`Đổi mật khẩu cho tài khoản ${values.loginName} thành công!`);
             form.resetFields();
-        } catch (error) { /* handled by interceptor */ }
+        } catch (error) {
+
+            console.log("Đổi mật khẩu cho tài khoản " ,error);
+            message.error( error.response.data.message || error.response.data.error ||"Đổi mật khẩu cho tài khoản error:", DURATION);
+
+        }
         finally { setLoading(false); }
     };
 

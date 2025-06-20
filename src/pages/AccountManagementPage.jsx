@@ -149,7 +149,11 @@ const AccountManagementPage = () => {
             ]);
             setStaffs(staffsRes.data);
             setReaders(readersRes.data);
-        } catch (error) { /* handled by interceptor */ }
+        } catch (error) {
+            console.log("fetchData",error);
+            message.error( error.response.data.message || error.response.data.error ||"fetchData error:", DURATION);
+
+        }
         finally { setLoading(false); }
     }, []);
 
@@ -177,7 +181,8 @@ const AccountManagementPage = () => {
             form.resetFields();
             fetchData();
         } catch (error) {
-            // Lỗi đã được interceptor xử lý và hiển thị
+            console.log("handleCreateAccount",error);
+            message.error( error.response.data.message || error.response.data.error ||"handleCreateAccount error:", DURATION);
         }
     };
 

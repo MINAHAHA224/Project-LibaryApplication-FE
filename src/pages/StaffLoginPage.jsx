@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Form, Input, Button, Card, Spin, message ,Typography } from 'antd';
+import { Form, Input, Button, Card, Spin, message ,Typography , App } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import './StaffLoginPage.css'; // Sẽ tạo file CSS này
 const { Title, Text } = Typography;
@@ -11,6 +11,9 @@ const LoginPage = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
 
+    const { message } = App.useApp();
+    const DURATION = 3;
+
     const onFinish = async (values) => {
         setLoading(true);
         try {
@@ -19,8 +22,10 @@ const LoginPage = () => {
             navigate('/'); // Chuyển hướng đến trang chủ sau khi đăng nhập thành công
         } catch (error) {
             // Hiển thị thông báo lỗi từ server hoặc lỗi chung
-            const errorMessage = error.response?.data?.message || 'Tên đăng nhập hoặc mật khẩu không chính xác.';
-            message.error(errorMessage);
+            console.log("Login error:", error);
+            message.error( error.response.data.message || error.response.data.error ||"Login error:", DURATION);
+
+
         } finally {
             setLoading(false);
         }

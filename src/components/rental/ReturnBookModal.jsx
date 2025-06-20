@@ -13,7 +13,7 @@
 //     const [loading, setLoading] = useState(true);
 //     const [staffList, setStaffList] = useState([]);
 //     const [unreturnedBooks, setUnreturnedBooks] = useState([]);
-//     const { message: messageApi } = AntdApp.useApp();
+//     const { message: message } = AntdApp.useApp();
 //
 //     const fetchUnreturnedBooks = useCallback(async () => {
 //         if (!ticketId) return;
@@ -30,11 +30,11 @@
 //             setUnreturnedBooks(booksToReturn);
 //             setStaffList(staffRes.data);
 //         } catch (error) {
-//             messageApi.error("Lỗi khi tải danh sách sách cần trả.");
+//             message.error("Lỗi khi tải danh sách sách cần trả.");
 //         } finally {
 //             setLoading(false);
 //         }
-//     }, [ticketId, messageApi]);
+//     }, [ticketId, message]);
 //
 //     useEffect(() => {
 //         if (visible) {
@@ -64,10 +64,10 @@
 //             const soNgayMuon = (ngayTra - ngayMuon) / (1000 * 60 * 60 * 24);
 //
 //             if (soNgayMuon > 15) {
-//                 messageApi.warning(`Trả sách muộn! Thẻ của độc giả có thể đã bị khóa.`, DURATION + 2);
+//                 message.warning(`Trả sách muộn! Thẻ của độc giả có thể đã bị khóa.`, DURATION + 2);
 //             }
 //
-//             messageApi.success(`Trả sách "${bookToReturn.tensach}" thành công!`, DURATION);
+//             message.success(`Trả sách "${bookToReturn.tensach}" thành công!`, DURATION);
 //
 //             // Sau khi trả thành công, tải lại danh sách sách chưa trả
 //             fetchUnreturnedBooks();
@@ -170,7 +170,7 @@ const ReturnBookModal = ({ visible, onCancel, onSuccess, ticketId }) => {
     const [loading, setLoading] = useState(true);
     const [rentalInfo, setRentalInfo] = useState(null); // Lưu thông tin phiếu mượn
     const [unreturnedBooks, setUnreturnedBooks] = useState([]);
-    const { message: messageApi } = AntdApp.useApp();
+    const { message } = AntdApp.useApp();
     const DURATION = 3;
 
     const fetchUnreturnedBooks = useCallback(async () => {
@@ -184,11 +184,12 @@ const ReturnBookModal = ({ visible, onCancel, onSuccess, ticketId }) => {
             const booksToReturn = detailRes.data.danhSachSach.filter(book => !book.daTra);
             setUnreturnedBooks(booksToReturn.map(b => ({ ...b, tinhTrangTra: 'Tốt' }))); // Gán tình trạng trả mặc định
         } catch (error) {
-            messageApi.error("Lỗi khi tải danh sách sách cần trả.");
+           console.error("fetchUnreturnedBooks error:", error);
+            message.error( error.response.data.message || error.response.data.error ||"fetchUnreturnedBooks error:", DURATION);
         } finally {
             setLoading(false);
         }
-    }, [ticketId, messageApi]);
+    }, [ticketId, message]);
 
     useEffect(() => {
         if (visible) {
@@ -216,10 +217,10 @@ const ReturnBookModal = ({ visible, onCancel, onSuccess, ticketId }) => {
             const soNgayMuon = Math.floor((ngayTra - ngayMuon) / (1000 * 60 * 60 * 24));
 
             if (soNgayMuon > 15) {
-                messageApi.warning(`Trả sách muộn ${soNgayMuon - 15} ngày! Thẻ của độc giả có thể đã bị khóa.`, DURATION + 2);
+                message.warning(`Trả sách muộn ${soNgayMuon - 15} ngày! Thẻ của độc giả có thể đã bị khóa.`, DURATION + 2);
             }
 
-            messageApi.success(`Trả sách "${bookToReturn.tensach}" thành công!`, DURATION);
+            message.success(`Trả sách "${bookToReturn.tensach}" thành công!`, DURATION);
 
             // Tải lại danh sách sách chưa trả bên trong modal
             fetchUnreturnedBooks();
@@ -232,6 +233,7 @@ const ReturnBookModal = ({ visible, onCancel, onSuccess, ticketId }) => {
         } catch (error) {
             // Lỗi API đã được interceptor xử lý
             console.error("Return book failed", error);
+            message.error( error.response.data.message || error.response.data.error ||"Return book failed", DURATION);
         } finally {
             setLoading(false);
         }

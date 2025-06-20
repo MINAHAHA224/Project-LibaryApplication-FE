@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     Form, Input, Button, Select, DatePicker, Table, Card, Row, Col,
-    Space, message, Popconfirm, Divider, Typography, Empty, Tag , Modal
+    Space, message, Popconfirm, Divider, Typography, Empty, Tag , Modal , App
 } from 'antd';
 import {UserOutlined, BookOutlined, SearchOutlined, WarningOutlined, FileExcelOutlined} from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -36,6 +36,8 @@ const RentalPage = () => {
     const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
     const [isReturnModalVisible, setIsReturnModalVisible] = useState(false);
     const [selectedTicketId, setSelectedTicketId] = useState(null);
+    const { message } = App.useApp();
+    const DURATION = 3;
 
     // --- EFFECTS ---
     useEffect(() => {
@@ -79,6 +81,7 @@ const RentalPage = () => {
             setActiveReaders(activeReadersRes.data);
         } catch (error) {
             message.error("Lỗi khi tải dữ liệu ban đầu.");
+            message.error( error.response.data.message || error.response.data.error ||"loadInitialData error:", DURATION);
         } finally {
             setLoading({ form: false, history: false ,books: false  ,readers: false});
         }
@@ -179,7 +182,9 @@ const RentalPage = () => {
             handleResetForm();
             loadInitialData(); // Tải lại toàn bộ
         } catch (error) {
-            message.error(error.response?.data?.error || 'Lỗi khi lập phiếu mượn.');
+
+            message.error( error.response.data.message || error.response.data.error ||"Lỗi khi lập phiếu mượn error:", DURATION);
+
         } finally {
             setLoading({ form: false, history: false });
         }

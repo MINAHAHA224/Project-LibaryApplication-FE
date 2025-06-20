@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {Modal, Spin, Table, Tag, Typography, Descriptions, Empty, Button} from 'antd';
+import {Modal, Spin, Table, Tag, Typography, Descriptions, Empty, Button , App} from 'antd';
 import { getRentalDetail } from '../../services/rentalService';
 import { formatDate } from '../../utils/helpers';
 
@@ -8,6 +8,8 @@ const { Title } = Typography;
 const RentalDetailModal = ({ visible, onCancel, ticketId }) => {
     const [loading, setLoading] = useState(true);
     const [rentalData, setRentalData] = useState(null);
+    const { message } = App.useApp();
+    const DURATION = 3;
 
     useEffect(() => {
         if (visible && ticketId) {
@@ -22,7 +24,8 @@ const RentalDetailModal = ({ visible, onCancel, ticketId }) => {
                     setRentalData(response.data);
                     console.log("date" ,response.data )
                 } catch (error) {
-                    // Lỗi đã được xử lý
+                    console.error("fetchDetails error:", error);
+                    message.error( error.response.data.message || error.response.data.error ||"fetchDetails error:", DURATION);
                 } finally {
                     setLoading(false);
                 }

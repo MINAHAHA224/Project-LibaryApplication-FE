@@ -1,8 +1,11 @@
 import React from 'react';
-import { Modal, Form, Input, message } from 'antd';
+import { Modal, Form, Input, message , App } from 'antd';
 import {changePassword} from "../services/authService.js";
 
 const ChangePasswordModal = ({ visible, onCancel }) => {
+    const { message } = App.useApp();
+    const DURATION = 3;
+
     const [form] = Form.useForm();
 
     const handleOk = async () => {
@@ -14,6 +17,8 @@ const ChangePasswordModal = ({ visible, onCancel }) => {
         } catch (error) {
             // Lỗi đã được interceptor xử lý và hiển thị
             console.error("Change password failed:", error);
+            message.error( error.response.data.message || error.response.data.error ||"handleOk error:", DURATION);
+
         }
     };
 
