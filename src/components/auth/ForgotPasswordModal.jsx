@@ -12,8 +12,20 @@ const ForgotPasswordModal = ({ visible, onCancel }) => {
         try {
             const values = await form.validateFields();
             const response = await forgotPassword(values);
-            message.success(response.data.message , DURATION);
-            onCancel(); // Đóng modal sau khi thành công
+            Modal.info({
+                title: 'Vui lòng kiểm tra email',
+                content: 'Chúng tôi đã gửi hướng dẫn khôi phục mật khẩu tới email của bạn. Vui lòng kiểm tra trong vài giây...',
+                centered: true,
+                okButtonProps: { style: { display: 'none' } }, // Ẩn nút OK
+            });
+            // message.success(response.data.message , DURATION);
+            // onCancel(); // Đóng modal sau khi thành công
+
+            // Đợi 3 giây rồi tự đóng modal và gọi onCancel
+            setTimeout(() => {
+                Modal.destroyAll(); // Đóng modal chờ
+                onCancel();         // Đóng modal chính (nếu khác)
+            }, 3000);
         } catch (error) {
             console.error("Forgot password failed:", error);
             message.error( error.response.data.message || error.response.data.error ||"handleOk error:", DURATION);
