@@ -73,11 +73,11 @@ const StaffModal = ({ visible, onCancel, onSave, initialData }) => {
                         max: 50,
                         message: 'Email không được vượt quá 50 ký tự',
                     },
-                    // {
-                    // type: 'email',
-                    // pattern: /^[a-zA-Z0-9._%+-]+@ptithcm\.edu\.vn$/,
-                    //  message: 'Email phải có định dạng hợp lệ và thuộc domain @ptithcm.edu.vn'
-                    // }
+                    {
+                    type: 'email',
+                    pattern: /^[a-zA-Z0-9._%+-]+@ptithcm\.edu\.vn$/,
+                     message: 'Email phải có định dạng hợp lệ và thuộc domain @ptithcm.edu.vn'
+                    }
                 ]}>
                     <Input />
                 </Form.Item>

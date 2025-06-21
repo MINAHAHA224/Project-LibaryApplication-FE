@@ -53,7 +53,7 @@ const BookModal = ({ visible, onCancel, onSave, initialData, drawers }) => {
                     label="Mã Sách"
                     rules={[{ required: true, message: 'Vui lòng nhập Mã Sách!' }]}
                 >
-                    <Input disabled={isEditing} />
+                    <Input disabled={isRented} />
                 </Form.Item>
                 <Form.Item
                     name="maNganTu"

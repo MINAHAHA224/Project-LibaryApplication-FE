@@ -5,6 +5,7 @@ import { Form, Input, Button, Card, Spin, message ,Typography , App } from 'antd
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import './StaffLoginPage.css'; // Sẽ tạo file CSS này
 const { Title, Text } = Typography;
+import ForgotPasswordModal from '../components/auth/ForgotPasswordModal';
 
 const LoginPage = () => {
     const [loading, setLoading] = useState(false);
@@ -13,6 +14,7 @@ const LoginPage = () => {
 
     const { message } = App.useApp();
     const DURATION = 3;
+    const [isForgotModalVisible, setIsForgotModalVisible] = useState(false);
 
     const onFinish = async (values) => {
         setLoading(true);
@@ -51,7 +53,11 @@ const LoginPage = () => {
                         >
                             <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu" />
                         </Form.Item>
-
+                        <Form.Item>
+                            <a className="login-form-forgot" href="#" onClick={() => setIsForgotModalVisible(true)}>
+                                Quên mật khẩu?
+                            </a>
+                        </Form.Item>
                         <Form.Item>
                             <Button type="primary" htmlType="submit" className="login-form-button" block>
                                 Đăng nhập
@@ -60,6 +66,11 @@ const LoginPage = () => {
                     </Form>
                 </Spin>
             </Card>
+            {/* Modal quên mật khẩu */}
+            <ForgotPasswordModal
+                visible={isForgotModalVisible}
+                onCancel={() => setIsForgotModalVisible(false)}
+            />
         </div>
     );
 };

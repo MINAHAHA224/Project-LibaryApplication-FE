@@ -16,8 +16,8 @@ export const createBook = (isbn, bookData) => {
 };
 
 // Cập nhật sách con
-export const updateBook = (isbn, bookId, bookData) => {
-    return apiClient.put(`/book-titles/${isbn}/books/${bookId}`, bookData);
+export const updateBook = (isbn, oldBookId, bookData) => {
+    return apiClient.put(`/book-titles/${isbn}/books/${oldBookId}`, bookData);
 };
 
 // Xóa sách con
