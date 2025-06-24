@@ -258,7 +258,7 @@ const ReportPreviewPage = () => {
                 });
                 setTotals({ books: totalBooks, copies: totalCopies });
             }
-            // Thêm các case khác nếu cần
+
         } catch (error) {
             console.error(`Failed to fetch data for report type: ${state.reportType}`, error);
         } finally {

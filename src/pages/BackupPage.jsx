@@ -5,10 +5,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     Row, Col, List, Table, Button, Checkbox, Radio, Space,
-    Spin, Popconfirm, Tooltip, Empty, App, Modal, Typography, DatePicker
+    Spin, Popconfirm, Tooltip, Empty, App, Typography, DatePicker, Tag
 } from 'antd';
 import { CloudUploadOutlined, RetweetOutlined } from '@ant-design/icons';
-import { getDatabases, getBackupHistory, backupDatabase, restoreDatabase } from '../services/backupService';
+import {
+    getDatabases,
+    getBackupHistory,
+    backupDatabase,
+    restoreDatabase,
+    backupTransactionLog
+} from '../services/backupService';
 const { Title, Text } = Typography; // Có thể giữ lại Title vì nó không bị trùng tên
 
 const BackupPage = () => {
@@ -79,6 +85,20 @@ const BackupPage = () => {
         }
     };
 
+    const handleBackupLog = async () => {
+        if (!selectedDb) return;
+        setLoading(p => ({ ...p, history: true }));
+        try {
+            await backupTransactionLog(selectedDb);
+            message.success("Sao lưu Transaction Log thành công!" , DURATION);
+            fetchHistory(selectedDb); // Tải lại lịch sử để thấy bản log mới
+        } catch (error) {
+            message.error( error.response.data.message || error.response.data.error ||"handleBackupLog error:", DURATION);
+
+        }
+        finally { setLoading(p => ({ ...p, history: false })); }
+    };
+
     const handleRestore = () => {
         if (!selectedBackupPosition) {
             message.warning('Vui lòng chọn một bản sao lưu để phục hồi.', DURATION);
@@ -90,91 +110,82 @@ const BackupPage = () => {
             return;
         }
 
-        modal.confirm({ // Sử dụng modal instance từ App.useApp()
-            title: 'Bạn chắc chắn muốn phục hồi?',
-            content: `Hành động này sẽ khôi phục CSDL '${selectedDb}' về bản sao lưu số ${selectedBackupPosition}. Mọi dữ liệu hiện tại sẽ bị mất và ứng dụng sẽ được tải lại.`,
-            okText: 'Chắc chắn Phục hồi',
+        modal.confirm({
+            title: 'Xác nhận Phục hồi',
+            content: `Hành động này sẽ khôi phục CSDL '${selectedDb}'. Sau khi hoàn tất, ứng dụng sẽ cần được tải lại. Bạn có chắc chắn muốn tiếp tục?`,
+            okText: 'Đồng ý Phục hồi',
             cancelText: 'Hủy',
-            // onOk sẽ trả về một Promise, nút OK sẽ tự có loading
-            // onOk: async () => {
-            //     const payload = {
-            //         dbName: selectedDb,
-            //         backupFileNumber: selectedBackupPosition,
-            //         pitr: isPitr,
-            //         // Format lại ngày giờ để Backend có thể parse
-            //         restoreDateTime: isPitr ? restoreDateTime.format('YYYY-MM-DDTHH:mm:ss') : null,
-            //     };
-            //
-            //     try {
-            //         await restoreDatabase(payload);
-            //
-            //         // Nếu thành công, đóng modal confirm và mở modal success
-            //         modal.success({
-            //             title: 'Phục hồi thành công!',
-            //             content: 'Cơ sở dữ liệu đã được phục hồi. Hệ thống sẽ tự động tải lại ngay bây giờ.',
-            //             okText: 'Tải lại',
-            //             onOk: () => window.location.reload(),
-            //             afterClose: () => window.location.reload(), // Đề phòng user không nhấn OK
-            //         });
-            //
-            //     } catch (error) {
-            //         console.error("Restore failed", error);
-            //         // Lỗi đã được interceptor xử lý và hiển thị toast
-            //         // Chỉ cần ném lỗi ra để modal confirm biết là đã thất bại
-            //         // và không tự đóng lại.
-            //         throw error;
-            //     }
-            // },
             onOk: async () => {
-                const payload = {
-                    dbName: selectedDb,
-                    backupFileNumber: selectedBackupPosition,
-                    pitr: isPitr,
-                    // Format lại ngày giờ để Backend có thể parse
-                    restoreDateTime: isPitr ? restoreDateTime.format('YYYY-MM-DDTHH:mm:ss') : null,
-                };
                 const restoreLoadingKey = 'restoreLoading';
-                message.loading({ content: 'Đang phục hồi, vui lòng không đóng trang...', key: restoreLoadingKey, duration: 0 });
+                message.loading({ content: 'Đang phục hồi, tiến trình này có thể mất vài phút...', key: restoreLoadingKey, duration: 0 });
+
                 try {
+                    const payload = {
+                        dbName: selectedDb,
+                        backupFileNumber: selectedBackupPosition,
+                        // Thêm các trường cho PITR nếu cần
+                    };
                     await restoreDatabase(payload);
+
+                    // Nếu API không ném lỗi, nghĩa là đã thành công
                     message.destroy(restoreLoadingKey);
 
-                    // Nếu thành công, đóng modal confirm và mở modal success
+                    // Hiển thị thông báo cuối cùng và buộc người dùng reload
                     modal.success({
                         title: 'Phục hồi thành công!',
-                        content: 'Cơ sở dữ liệu đã được phục hồi. Hệ thống sẽ tự động tải lại ngay bây giờ.',
-                        okText: 'Tải lại',
-                        duration: 10  // Đề phòng user không nhấn OK
+                        content: 'Cơ sở dữ liệu đã được khôi phục. Nhấn OK để tải lại ứng dụng.',
+                        okText: 'OK, Tải lại ngay',
+                        onOk: () => {
+                            window.location.reload();
+                        },
+                        // Nếu user không nhấn gì, cũng tự reload sau 5s
+                        afterClose: () => {
+                            setTimeout(() => window.location.reload(), 5000);
+                        }
                     });
-                    // Đặt một bộ đếm thời gian để tự động reload trang sau một khoảng thời gian dài (ví dụ: 15 giây)
-                    // để chờ server khởi động lại.
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 15000);
 
                 } catch (error) {
+                    // Lỗi đã được interceptor xử lý và hiển thị toast
                     message.destroy(restoreLoadingKey);
+                    console.error("Restore failed on API call", error);
                 }
-            },
+            }
         });
     };
 
 
     const columns = [
         { title: 'Bản sao lưu thứ #', dataIndex: 'position', key: 'position', width: '15%' },
-        { title: 'Diễn giải', dataIndex: 'description', key: 'description' },
+        {
+            title: 'Diễn giải',
+            dataIndex: 'description',
+            key: 'description',
+            render: (text, record) => (
+                // Dùng Tag để phân biệt màu sắc
+                <Tag color={record.backupType === 'D' ? 'blue' : 'green'}>
+                    {text}
+                </Tag>
+            )
+        },
         { title: 'Ngày giờ sao lưu', dataIndex: 'date', key: 'date', render: (text) => text ? new Date(text).toLocaleString('vi-VN') : '' },
         { title: 'User', dataIndex: 'user', key: 'user' },
         {
             title: 'Chọn để Phục hồi',
             key: 'select',
             align: 'center',
-            render: (_, record) => (
-                <Radio
-                    checked={selectedBackupPosition === record.position}
-                    onChange={() => setSelectedBackupPosition(record.position)}
-                />
-            ),
+            render: (_, record) => {
+                // === LOGIC MỚI: CHỈ HIỂN THỊ RADIO CHO BẢN BACKUP FULL ('D') ===
+                if (record.backupType === 'D') {
+                    return (
+                        <Radio
+                            checked={selectedBackupPosition === record.position}
+                            onChange={() => setSelectedBackupPosition(record.position)}
+                        />
+                    );
+                }
+                // Nếu là backup log ('L') hoặc loại khác, không hiển thị gì cả
+                return null;
+            },
         },
     ];
 
@@ -205,7 +216,10 @@ const BackupPage = () => {
                             <Popconfirm title={`Bạn chắc chắn muốn sao lưu CSDL "${selectedDb}"?`} onConfirm={handleBackup} okText="Đồng ý" cancelText="Hủy">
                                 <Button type="primary" icon={<CloudUploadOutlined />}>Sao lưu</Button>
                             </Popconfirm>
-
+                            {/* === NÚT MỚI === */}
+                            <Button onClick={handleBackupLog} style={{ background: '#52c41a', color: 'white' }}>
+                                Sao lưu Log (cho Point-in-Time)
+                            </Button>
                             <Button type="primary" danger icon={<RetweetOutlined />}
                                     disabled={!selectedBackupPosition} onClick={handleRestore}>
                                 Phục hồi

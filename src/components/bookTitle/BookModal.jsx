@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import {Modal, Form, Input, Select, Checkbox, message, App} from 'antd';
+import {Modal, Form, Input, Select, Checkbox, message, App } from 'antd';
 
 const { Option } = Select;
 
@@ -70,6 +70,12 @@ const BookModal = ({ visible, onCancel, onSave, initialData, drawers }) => {
                 </Form.Item>
                 <Form.Item name="tinhTrang" label="Tình Trạng" valuePropName="checked">
                     <Checkbox disabled={isRented} >Tốt (sẵn sàng sử dụng)</Checkbox>
+                </Form.Item>
+                {/* === CHECKBOX MỚI CHO SÁCH GỐC === */}
+                <Form.Item name="laSachGoc" label="Loại sách" valuePropName="checked">
+                    <Checkbox disabled={isRented}>
+                        Là sách gốc (Không cho phép mượn)
+                    </Checkbox>
                 </Form.Item>
                 <Form.Item name="choMuon" label="Trạng thái mượn" valuePropName="checked">
                     <Checkbox disabled={true}>
